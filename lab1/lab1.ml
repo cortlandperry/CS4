@@ -91,21 +91,17 @@ a *)
 our recursive function p will not run, because the interpreter will
 run the first part of test and see x = 0 and then return 0. OTherwise,
 if it is using a strict interpreter (applicitive order), we will 
-evaluate the recursive function p when we first call test, but it will
-not be necesary to return the final result. *)
+evaluate the recursive function p when we first call test,and thus the
+program will enter an infinite loop. *)
 
 (* B.2 *)
-(* When Alyssya tries to use this function to evaluate square roots,
-the machine will first run our new_if() function that was created. That
-means it will evaluate the predicate, which will run our function
-is_good_enough on our guess and actual x. If it is good enough
-(when that returns true), our function will return our guess and that 
-will be the square root. If that function returns false, then it will
-cause our predicate to be false, and then we will run into the "else"
-statement in our new_if. Then we run our function again with a new and 
-imporved guess. This will repeat until our "improved guess" satisfies
-our conditions in is_good_enough, in which case that will be 
-returned. *)
+(* Our recursive function will run an infinite loop, and thus 
+cause a stack overflow. Since this function is in applicative order, it
+means that it will evaluate all of the inputs that are passed into
+each function. This means that the "else" condition in our new if will
+allways be evaluated, which means that we will infinitely be calling 
+sqrt_iter every single time we call it. (because it is passed into the
+arguments of the function). Thus, it will be evaulating things forever*)
 
 (* B.3 *)
 (* I hope this is enough steps lol! *)
@@ -244,8 +240,10 @@ let rec e_approximation x =
 
 (* C.1.d *)
 (* When you try to make a better approximation, ocaml will return
-inifity as our answer. This happens because ocaml cannot store
-values that are as small as 1/100! in our floating point number. *)
+inifity as our answer. This happens because ocaml has to calculate 100!
+and integers have a limited range, so it will produce the error because
+100! is too big for ocaml to process. Thus, it returns infinity
+as a result of the calculation. *)
 
 (* C.2 *)
 let rec is_even x =
@@ -258,21 +256,20 @@ let rec f_rec x =
 	if x < 3 then x 
 	else f_rec(x - 1) + 2 * f_rec(x - 2) + 3 * f_rec (x - 3)
 	
-let rec iter_help three_b two_b one_b current max = 
-	let cur_val = one_b + 2 * two_b + 3 * three_b in
-	if current >= max then cur_val
-	else iter_help two_b one_b cur_val (current + 1) max
-
 
 let f_iter x = 
-	if x < 3 then x else iter_help 0 1 2 3 x
+	let rec iter_help three_b two_b one_b current max = 
+		let cur_val = one_b + 2 * two_b + 3 * three_b in
+		if current >= max then cur_val
+		else iter_help two_b one_b cur_val (current + 1) max
+	in if x < 3 then x else iter_help 0 1 2 3 x
 	
 (* C.4 *)
 let rec pascal_coefficient x y = 
 	match x, y with
-		| i, j when i < 1 || j < 1 -> failwith "invalid arguments"
-		| i, j when j > i -> failwith "invalid arguments"
-		| 1, i -> 1
-		| j, 1 -> 1
-		| i, j when i = j -> 1
-		| i, j -> pascal_coefficient (x-1) (y-1) + pascal_coefficient (x-1) (y)
+		| x', y' when x' < 1 || y' < 1 -> failwith "invalid arguments"
+		| x', y' when y' > x' -> failwith "invalid arguments"
+		| 1, y' -> 1
+		| x', 1 -> 1
+		| x', y' when x' = y' -> 1
+		| _ -> pascal_coefficient (x-1) (y-1) + pascal_coefficient (x-1) (y)
